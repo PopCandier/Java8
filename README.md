@@ -54,3 +54,31 @@ public interface Function<T, R> {
 ![1570086090289](./img/1570086090289.png)
 
 ![1570086104721](./img/1570086104721.png)
+
+#### 流简介
+
+![1570439904061](./img/1570439904061.png)
+
+需要说明的是，流只能被消费一次。如果你想要再次消费，只能重新获取流
+
+```java
+ist<String> title = Arrays.asList("java8","in","action");
+        Stream<String> s = title.stream();
+        s.forEach(System.out::println);
+        s.forEach(System.out::println);//会打印错误
+```
+
+![1570440948268](./img/1570440948268.png)
+
+终端操作是一个不会返回stream类型的操作，返回的可能是Integer，也可能是void
+
+![1570451273944](./img/1570451273944.png)
+
+#### 使用流
+
+#### Optional
+
+![1570455343846](./img/1570455343846.png)
+
+![1570458261366](./img/1570458261366.png)
+
