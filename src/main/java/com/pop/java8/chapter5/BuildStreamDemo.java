@@ -61,6 +61,7 @@ public class BuildStreamDemo {
         long uniqueWords = 0;
         try(Stream<String> lines=
                     Files.lines(Paths.get("data.txt"), Charset.defaultCharset())){//之后流会自动关闭
+            //会为每一行都生成一串流
             uniqueWords = lines.flatMap(line->Arrays.stream(line.split(" ")))//生成单词流，因为一个句子中，空开的为一个单词
                     .distinct().count();
         } catch (IOException e) {
