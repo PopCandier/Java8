@@ -3,12 +3,12 @@ package com.pop.java8.chapter6;
 import com.pop.java8.chapter4.Dish;
 import com.pop.java8.chapter4.StreamDemo;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.reducing;
 
 /**
  * @program: java8
@@ -27,6 +27,7 @@ public class CollectionDemo {
 
         group();
     }
+
 
     private static void count() {
         //collect 收集者，接受一个收集器 Collector 他的行为将会被收录
@@ -51,9 +52,96 @@ public class CollectionDemo {
 
         Comparator<Dish> dishCaloriesComparator
                 = Comparator.comparingInt(Dish::getCalories);
+        //比较标准  比较卡路里最高的踩
+        Optional<Dish> mostCalorieDish=StreamDemo.
+                menu.stream().collect(maxBy(dishCaloriesComparator));
+
+        Optional<Dish> smallCalorieDish =
+                StreamDemo.menu.stream().collect(
+                        minBy(dishCaloriesComparator)
+                );
+
+        mostCalorieDish.ifPresent(d-> System.out.println(d.getCalories()));
+        smallCalorieDish.ifPresent(d-> System.out.println(d.getCalories()));
 
     }
 
+    private static void sum(){
+        /**
+         * 汇总，Collectors 类专门为汇总提供了一个工厂方法
+         * Collectors.summingInt 它可接受一个对象映射为求和所需的int函数
+         * 并返回一个收集器。
+         *
+         * 该收集器在传递给普通的collect方法后，执行
+         * 我们所需的汇总操作
+         */
+        int total=StreamDemo.menu.stream().collect(summingInt(Dish::getCalories));
+        int total1=StreamDemo.menu.stream().map(Dish::getCalories).reduce(0,Integer::sum);
+        System.out.println(total+" "+total1);
+    }
+
+    private static void average(){
+        //同时，你也可以求平均值
+        Double average=StreamDemo.menu.stream().collect(averagingDouble(Dish::getCalories));
+
+    }
+
+    private static void summary(){
+
+        /**
+         * 当然，一些情况下，我们可能需要获得不止最大值和最小值这种，
+         * 也许会获得很多，这个时候通过一次summarizing操作就可以完成全部
+         */
+
+        IntSummaryStatistics summaryStatistics= StreamDemo.menu.stream().collect(summarizingInt(Dish::getCalories));
+        System.out.println(summaryStatistics.getMax()+" "+
+                summaryStatistics.getAverage()+" "+summaryStatistics.getCount()+" "+summaryStatistics.getSum());
+    }
+
+    private static void joining2(){
+
+        /**
+         * 连接字符串，joining工厂方法返回的收集器会把对流中每一个对象应用
+         * toString方法得到所有字符串组成一个字符串
+         * 那么在这个例子中，你会把菜单中所有的菜肴名称连接起来。
+         */
+
+        String shortMenu=StreamDemo.menu.stream().map(Dish::getName)
+                .collect(joining());
+
+        //你还可以选择 加入分割符
+        String shortMenu1=StreamDemo.menu.stream().map(Dish::getName).collect(joining(", "));
+
+        System.out.println(shortMenu1);
+
+
+    }
+
+    /**
+     * 归约操作
+     *
+     * 事实上，我们已经讨论的所有收集器，都可以用reducing工厂方法
+     * 归约过程的特殊情况而已，Collectors.reducing工厂方法是所有这些
+     * 特殊情况的一般化
+     *
+     * 例如，用reducing方法创建的收集器来计算你的菜单总热量
+     */
+    private static void reduce(){
+        //算出菜单的总热量
+        int total=StreamDemo.menu.stream().collect(reducing(0,Dish::getCalories,(i,j)->i+j));
+        //找出热量最高的菜
+        Optional<Dish> dish= StreamDemo.menu.stream().collect(reducing((d1,d2)->d1.getCalories()>d1.getCalories()?d1:d2));
+        /**
+         * 第一参数是归约操作的初始值，也是流中没有元素时的返回值，所以很显然对于数值和而言
+         * 是一个合适的值
+         *
+         * 第二参数就是将菜肴转化为int的一个类型
+         *
+         * 第三个参数就是二合一求值
+         */
+
+        dish.ifPresent(d-> System.out.println(d.getName()+" "+d.getCalories()));
+    }
 
     private static void group(){
         /**
@@ -133,6 +221,71 @@ public class CollectionDemo {
 
         StreamDemo.menu.stream().collect(Collectors.groupingBy(Dish::getType,
                 Collectors.counting()));//分类的总数
+
+
+        /**
+         * 在举一个其它的例子，前面查找出热量最高的菜肴的收集器改一改
+         * 按照菜的类型分类
+         */
+        Map<Dish.Type,Optional<Dish>> t= StreamDemo.menu.stream().collect(groupingBy(Dish::getType,
+                maxBy(Comparator.comparingInt(Dish::getCalories))));
+        /**
+         * 这里需要补充的是，因为使用的是maxBy收集器，所以返回值是Optional
+         * 但这是问题所在。
+         * 如果菜单里中没有某一类型的Dish，这个类型就不会对应一个Optional.empty()
+         * 也就是说，如果这某一Dish.Type不存在在这个集合中的情况下，这个类别的分组就不会存在
+         * 就好像没有统计一样，在我们的映像中，起码你没统计到这一分类，map中也可以有
+         * 这个类的key，只不过可能value，这里是optional也可以存在，只不过是空的。
+         * 但是上述方法，现在无法实现
+         *
+         * 这意味着Optional包装器在这里不是很有用，因为它不会仅仅因为它是归约收集器的
+         * 返回类型而表达一个最终可能不存在却意外存在的值
+         */
+
+        /**
+         * 所以，这意味着我们需要另一种方案
+         *
+         * 1.把收集器结果转化为另一种类型
+         *
+         * 因为分组操作的map结果中的每个值上包装Optional没什么用，
+         * 所以你可能想要把他们去掉，要做到这一点，或者更一般的说，把收集器返回
+         * 的结果转化为另一种类型，你可以使用Collectors.collectingAndThen工厂方法返回的收集器
+            查找每个子组中热量最高的Dish
+         */
+        Map<Dish.Type,Dish> t2= StreamDemo.menu.stream().collect(
+                groupingBy(Dish::getType,
+                        collectingAndThen(maxBy(Comparator.comparingInt(Dish::getCalories)),Optional::get)));
+        /**
+         * 这个收集器需要两个参数，要转化的收集器，和转化函数
+         */
+
+        /**
+         * 其他的一些常用的组合，与groupingBy联合使用的例子
+         *
+         * 一般来说，通过groupingBy工厂方法的第二个参数传递的收集器将会对同一组的所有流
+         * 元素执行进一步的归约，例如，你还重用求出所有菜肴热量总和的收集器，不过这次是对
+         * 每一组Dish求和
+         *
+         */
+
+        Map<Dish.Type,Integer> t3=StreamDemo.menu.stream().collect(groupingBy(Dish::getType,summingInt(Dish::getCalories)));
+
+        /**
+         * 然而尝尝和groupingBy联合使用的另一个收集器是mapping方法生成的。
+         * 这个方法接受两个参数，一个函数对流中的元素做变化，另一个则将变换的结果收集起来。
+         * 其目的是在累加之前对每个输入元素应用一个映射函数，这样就可以让接受特定类型元素的收集器
+         * 适应不同类型的对象。
+         *
+         * 比如，你想要知道对于每种类型Dish，菜肴中有哪些CaloricLevel，我们可以把groupingBy和mapping收集器
+         * 结合起来。
+         */
+
+        Map<Dish.Type,Set<CaloricLevel>> t4=StreamDemo.menu.stream().collect(groupingBy(Dish::getType,mapping(dish->{//第一个就是对流中的元素
+           //进行变化的函数
+           if(dish.getCalories()<=400) return CaloricLevel.DIET;
+           else if(dish.getCalories()<=700) return CaloricLevel.NORMAL;
+           else return CaloricLevel.FAT;
+       },toSet())));//这个就是收集，只不过这里是set
     }
 
     enum CaloricLevel{DIET,NORMAL,FAT}
