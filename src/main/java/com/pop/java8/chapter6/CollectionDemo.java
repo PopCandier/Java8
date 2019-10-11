@@ -5,6 +5,7 @@ import com.pop.java8.chapter4.StreamDemo;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.*;
@@ -287,6 +288,80 @@ public class CollectionDemo {
            else return CaloricLevel.FAT;
        },toSet())));//这个就是收集，只不过这里是set
     }
+
+    private static void partition(){
+        /**
+         * 分区。
+         *
+         * 分区是分组的特殊情况，原为映射为key的分类函数变为了谓词，也就是predicate，他将会
+         * 返回一个boolean类型的值，所以，分区的map只有两种key，true与false
+         *
+         * 例如，如果你是素食者或清了一位速食的朋友来共进晚餐
+         * 可能会想要把菜单按照速食和非速食分开
+         */
+        Map<Boolean,List<Dish>> partitionedMenu=
+                StreamDemo.menu.stream().collect(partitioningBy(Dish::isVegetarian));
+
+        //那么通过Map中键为true的值，就可以找出所有素食菜肴了
+        List<Dish> vegetarianDishes = partitionedMenu.get(true);
+
+        //虽然，你使用这个方法也可以相同的结果
+        List<Dish> t2 = StreamDemo.menu.stream().filter(Dish::isVegetarian)
+                .collect(toList());
+
+        //当然，这个也可以传入第二个参数
+        StreamDemo.menu.stream().collect(
+                partitioningBy(Dish::isVegetarian,
+                        groupingBy(Dish::getType))
+        );
+
+        //找到素食与非素食最高热量最高的那一道菜
+        Map<Boolean,Dish> t4=StreamDemo.menu.stream()
+                .collect(partitioningBy(Dish::isVegetarian,
+                        collectingAndThen(maxBy(Comparator.comparingInt(Dish::getCalories)),Optional::get)));
+
+    }
+
+    /**
+     * 将数字按质数和非质数分区
+     *
+     * 首先我们需要一个可以判断一个数是否是质数的方法
+     */
+    public boolean isPrime(int candidate){
+        //2-candidate 的范围中，都没有质数将会返回true
+        /**
+         * 产生一个自然数范围，从2开始，不包括待测数
+         *
+         * 如果待测数字不能被流中任意数字整除，则返回true
+         *
+         */
+        return IntStream.range(2,candidate)
+                .noneMatch(i->candidate%i==0);
+    }
+
+    /**
+     * 一个简单的优化是仅测试小于等于数平方根的因子
+     */
+    public boolean isPrime0(int candidate){
+        int candidateRoot=(int)Math.sqrt((double) candidate);
+        //也就是缩小的范围，减少了candidate的倍数
+        return IntStream.rangeClosed(2,candidateRoot)
+                .noneMatch(i->candidate%i==0);
+    }
+
+    /**
+     * 方法的一个总结
+     *
+     * 大于1，且只能被1和自己整除的数，叫做质数
+     */
+
+    public Map<Boolean,List<Integer>> partitionPrimes(int n){
+        return IntStream.rangeClosed(2,n).boxed()
+                .collect(partitioningBy
+                        (candidate->isPrime0(candidate)));
+    }
+
+
 
     enum CaloricLevel{DIET,NORMAL,FAT}
 }
