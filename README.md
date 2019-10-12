@@ -107,3 +107,47 @@ Collector接口中combiner方法的存在意义
 ![1570808117740](./img/1570808117740.png)
 
 ![1570807939483](./img/1570807939483.png)
+
+#### 并行流
+
+请注意，在现实中，对顺序流调用parallel方法并不意味着流本身有任何实际的变化。它 
+
+在内部实际上就是设了一个boolean标志，表示你想让调用parallel之后进行的所有操作都并 
+
+行执行。类似地，你只需要对并行流调用sequential方法就可以把它变成顺序流。请注意，你 
+
+可能以为把这两个方法结合起来，就可以更细化地控制在遍历流时哪些操作要并行执行，哪些要 
+
+顺序执行。例如，你可以这样做： 
+
+```java
+stream.parallel().filter(...).sequential().map(...).parallel() .reduce();  
+```
+
+但最后一次parallel或sequential调用会影响整个流水线。在本例中，流水线会并行执 
+
+行，因为最后调用的是它。
+
+**配置并行流使用的线程池** 
+
+看看流的parallel方法，你可能会想，并行流用的线程是从哪儿来的？有多少个？怎么 
+
+自定义这个过程呢？
+
+并行流内部使用了默认的ForkJoinPool（7.2节会进一步讲到分支/合并框架），它默认的 
+
+线程数量就是你的处理器数量，这个值是由 Runtime.getRuntime().available
+
+Processors()得到的。 
+
+但是你可以通过系统属性 java.util.concurrent.ForkJoinPool.common.  
+
+parallelism来改变线程池大小，如下所示： 
+
+System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism","12");  
+
+这是一个全局设置，因此它将影响代码中所有的并行流。反过来说，目前还无法专为某个 
+
+并行流指定这个值。一般而言，让ForkJoinPool的大小等于处理器数量是个不错的默认值， 
+
+除非你有很好的理由，否则我们强烈建议你不要修改它。
