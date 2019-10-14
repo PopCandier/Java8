@@ -159,3 +159,7 @@ System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism","12");
 ![1570983792977](./img/1570983792977.png)
 
 ![1570983803223](./img/1570983803223.png)
+
+#### Spliterator 
+
+![1571065495573](C:\Users\99405\AppData\Roaming\Typora\typora-user-images\1571065495573.png)
