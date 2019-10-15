@@ -363,5 +363,5 @@ public class CollectionDemo {
 
 
 
-    enum CaloricLevel{DIET,NORMAL,FAT}
+    public enum CaloricLevel{DIET,NORMAL,FAT}
 }

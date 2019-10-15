@@ -159,3 +159,8 @@ System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism","12");
 ![1570983792977](./img/1570983792977.png)
 
 ![1570983803223](./img/1570983803223.png)
+
+### 使用Java8特性增加代码可读性
+
+![1571121735154](./img/1571121735154.png)
+
