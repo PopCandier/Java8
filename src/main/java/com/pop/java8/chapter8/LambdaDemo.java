@@ -1,11 +1,15 @@
 package com.pop.java8.chapter8;
 
+import com.pop.java8.chapter3.BufferedReaderProcessor;
 import com.pop.java8.chapter4.Dish;
 import com.pop.java8.chapter4.StreamDemo;
 import com.pop.java8.chapter6.CollectionDemo;
 import org.junit.platform.commons.logging.LoggerFactory;
 import sun.rmi.runtime.Log;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -160,6 +164,33 @@ public class LambdaDemo {
          * 封装性更好（对象的状态也不会暴露给客户端代码了）。
          */
 
+    }
+
+    /**
+     * 环绕执行
+     *
+     * 我们介绍过另一种值得考虑的模式，那就是环绕执行。如果你发现虽然你的业务
+     * 代码千差万别，但是它们拥有同样的准备和清理阶段，这时，你完全可以将这部分代码用Lambda
+     * 实现。这种方式的好处是可以重用准备和清理阶段的逻辑，减少重复冗余的代码。下面这段代码
+     * 你在第3章中已经看过，我们再回顾一次。它在打开和关闭文件时使用了同样的逻辑，但在处理
+     * 文件时可以使用不同的Lambda进行参数化。
+     *
+     */
+
+    public static String processFile(BufferedReaderProcessor processor) throws IOException{
+        //拥有相同的开头，和结尾
+       try (BufferedReader br = new BufferedReader(new FileReader("java8/data.txt"))){
+           return processor.process(br);//行为被传递
+       }
+    }
+
+    public static void processFile0() throws IOException {
+        String oneLine = processFile(b -> b.readLine());
+        String oneLine1 = processFile(b -> b.readLine()+b.readLine());//你可以任意定义多种行为
+    }
+
+    interface BufferedReaderProcessor{//使用lambda表达式的函数接口
+        String process(BufferedReader b) throws IOException;
     }
 
 }
