@@ -160,6 +160,13 @@ System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism","12");
 
 ![1570983803223](./img/1570983803223.png)
 
+
+#### 修改代码可阅读性
+
+![1570983803223](./img/1571121735154.png)
+
+
+
 #### 位于第九章的默认方法
 
 ![1571241530562](./img/1571241530562.png)
@@ -175,4 +182,12 @@ System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism","12");
 ![1571242777278](./img/1571242777278.png)
 
 ![1571242937256](./img/1571242937256.png)
+
+#### Optional 的意义
+
+![1571392573010](./img/1571392573010.png)
+
+Optional 的 简单 api
+
+![1571392757968](./img/1571392757968.png)
 
