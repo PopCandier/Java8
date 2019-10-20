@@ -23,6 +23,15 @@ public class OptionalDemo {
      */
     static class Person{
         private Car car;
+        private int age;
+
+        public int getAge() {
+            return age;
+        }
+
+        public void setAge(int age) {
+            this.age = age;
+        }
 
         public Car getCar() {
             return car;
@@ -179,6 +188,54 @@ public class OptionalDemo {
         String name=getCarInsuranceName(Optional.of(person));
 
         System.out.println(name);
+
+    }
+
+    public void demo5(){
+        /**
+         * 使用 filter 剔除特定的值
+         *
+         * 你经常需要调用某个对象的方法，查看它的某些属性。比如，你可能需要检查保险公司的名
+         * 称是否为“Cambridge-Insurance”。为了以一种安全的方式进行这些操作，你首先需要确定引用指
+         * 向的Insurance对象是否为null，之后再调用它的getName方法，如下所示：
+         */
+        Insurance insurance = null;//假设他已经初始化了
+        if(insurance!=null&&"Cambridge-Insurance".equals(insurance.getName())){
+            System.out.println("ok");
+        }
+
+        //如果使用了Optional的Filter\方法会变成这样
+        Optional<Insurance> optionalInsurance = null;//假设已经初始化
+        optionalInsurance.
+                filter(insurance1 -> "Cambridge-Insurance".equals(insurance.getName()))
+                .ifPresent(x-> System.out.println("ok"));
+
+        /**
+         * filter方法接受一个谓词作为参数。如果Optional对象的值存在，并且它符合谓词的条件，
+         * filter方法就返回其值；否则它就返回一个空的Optional对象。如果你还记得我们可以将
+         * Optional看成最多包含一个元素的Stream对象，这个方法的行为就非常清晰了。如果Optional
+         * 对象为空，它不做任何操作，反之，它就对Optional对象中包含的值施加谓词操作。如果该操
+         * 作的结果为true，它不做任何改变，直接返回该Optional对象，否则就将该值过滤掉，将
+         * Optional的值置空
+         */
+
+        /**
+         * 小测试
+         *
+         * 假设在我们的Person/Car/Insurance 模型中，Person还提供了一个方法可以取得
+         * Person对象的年龄，请使用下面的签名改写代码清单10-5中的getCarInsuranceName方法：
+         * public String getCarInsuranceName(Optional<Person> person, int minAge)
+         * 找出年龄大于或者等于minAge参数的Person所对应的保险公司列表。
+         */
+    }
+
+    public String getCarInsuranceName(Optional<Person> person,int minAge){
+
+        return person.filter(person1 -> person1.getAge()>minAge)
+                .flatMap(p->Optional.of(p.getCar()))
+                .flatMap(car -> Optional.of(car.getInsurance()))
+                .map(Insurance::getName)
+                .orElse("Unknown");
 
     }
 
