@@ -13,6 +13,14 @@ import java.util.concurrent.Future;
 public class Shop {
     private String name;
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public Shop(String name) {
         this.name = name;
     }
@@ -182,5 +190,23 @@ public class Shop {
      * 况。你会学到如何以异步的方式查询多个商店，避免被单一的请求所阻塞，并由此提升你的“最
      * 佳价格查询器”的性能和吞吐量。
      */
+
+
+    /**
+     * 11-13
+     *
+     * 我们还假设所有的商店都同意修改getPrice方法的返回格式。
+     * getPrice现在以ShopName:price:DiscountCode的格式返回一个String类型的值。、
+     * 我们的示例实现中会返回一个
+     * 随机生成的Discount.Code，以及已经计算得出的随机价格：
+     */
+    public String getPriceEnum(String product){
+        double price = calculatePrice(product);
+        Discount.Code code = Discount.Code.
+                values()[random.nextInt(Discount.Code.values().length)];
+        return String.format("%s:%.2f:%s",name,price,code);
+    }
+
+
 
 }
